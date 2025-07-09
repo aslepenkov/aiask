@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    // Target ES2022 for modern Node.js features
+    "target": "ES2022",
+    // Use ES modules
+    "module": "ESNext",
+    // Node.js module resolution
+    "moduleResolution": "node",
+    // Enable ES module interop
+    "esModuleInterop": true,
+    // Consistent file casing
+    "forceConsistentCasingInFileNames": true,
+    // Strict type checking
+    "strict": true,
+    // Skip lib checking for faster builds
+    "skipLibCheck": true,
+    // Output directory
+    "outDir": "dist"
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  },
+  // Include single file
+  "include": [
+    "ask.ts"
+  ],
+  // Exclude build output and dependencies
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

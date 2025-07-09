@@ -1,0 +1,30 @@
+{
+  "name": "aiask",
+  "version": "1.0.0",
+  "description": "A minimal CLI for interacting with GitHub Copilot API",
+  "main": "ask.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "ask": "NODE_NO_WARNINGS=1 node --loader ts-node/esm ask.ts",
+    "start": "node dist/ask.js"
+  },
+  "keywords": [
+    "copilot",
+    "github",
+    "cli",
+    "ai",
+    "assistant"
+  ],
+  "author": "aslepenkov",
+  "license": "MIT",
+  "dependencies": {
+    "@vscode/copilot-api": "^0.1.1",
+    "undici": "^7.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
