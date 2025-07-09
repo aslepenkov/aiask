@@ -2,8 +2,7 @@
 
 A super minimalistic CLI tool for asking questions to GitHub Copilot. Single file, Docker-ready, with persistent authentication and daily logging.
 
-![AiAsk Demo](https://via.placeholder.com/800x400/2B2B2B/FFFFFF?text=AiAsk+Demo+GIF+Coming+Soon)
-*[Placeholder for usage demo GIF]*
+![AiAsk Dem](https://github.com/user-attachments/assets/54cbcbf3-3d6f-430e-af70-0ccd10f3955d)
 
 ## Features
 
@@ -17,7 +16,7 @@ A super minimalistic CLI tool for asking questions to GitHub Copilot. Single fil
 
 ### Prerequisites
 - Docker (for containerized setup)
-- Node.js 18+ (for direct usage)
+- Node.js 20+ (for direct usage)
 
 ### Docker Setup (Recommended)
 
