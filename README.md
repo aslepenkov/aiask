@@ -152,7 +152,6 @@ aiask/
 ## Configuration
 
 The app uses these environment variables (Docker only):
-- `DOTENV_CONFIG_PATH` - Path for token and logs in container
 - `NODE_NO_WARNINGS` - Suppresses Node.js deprecation warnings
 
 System prompt: "Answer shortly as an engineer would."
