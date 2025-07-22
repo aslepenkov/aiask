@@ -1,5 +1,3 @@
-#!/usr/bin/env NODE_NO_WARNINGS=1 node
-
 import fs from 'fs/promises';
 import path from 'path';
 import { fetch } from 'undici';
@@ -159,7 +157,7 @@ async function ask(prompt: string): Promise<void> {
     } catch (error: any) {
         console.error('[ERROR]', error.message || error);
     } finally {
-        process.exit(1);
+        process.exit(0);
     }
 }
 
@@ -169,7 +167,7 @@ const prompt = args.join(' ');
 
 if (!prompt) {
     console.log('Usage: aiask "your question"');
-    process.exit(1);
+    process.exit(0);
 }
 
 ask(prompt);
