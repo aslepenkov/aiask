@@ -1,232 +1,51 @@
 # AiAsk - Minimal GitHub Copilot CLI
 
-A super minimalistic CLI tool for asking questions to GitHub Copilot. Single file, Docker-ready, with persistent authentication and daily logging.
+A super minimalistic CLI tool for asking questions to GitHub Copilot or NVIDIA NIM. Single file, Docker-ready, with persistent authentication and daily logging.
 
 ![AiAsk Dem](https://github.com/user-attachments/assets/54cbcbf3-3d6f-430e-af70-0ccd10f3955d)
 
 ## Features
 
-- 🤖 **Ask GitHub Copilot** - Get quick answers from AI
+- 🤖 **Ask Copilot or NIM** - Seamlessly get answers from GitHub Copilot or NVIDIA NIM
 - 🔐 **One-time authentication** - GitHub OAuth with persistent token storage
 - 📝 **Daily logging** - Automatic logging of all questions and answers
-- 🐳 **Docker containerized** - Persistent container for fast responses
-- ⚡ **Minimalistic** - Single TypeScript file (~180 lines)
+- 🐳 **Docker containerized** - Daemonized setup for fast responses
+- ⚡ **Minimalistic** - Single TypeScript file, fast and clean
 
 ## Installation
 
-### Prerequisites
-- Docker (for containerized/daemonized setup)
-- Node.js 20+ (for direct/npm global usage)
-
 ### One-liner Docker Setup (Recommended)
 
-Install dynamically without cloning manually:
+Installs `aiask` automatically:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/aslepenkov/aiask/main/setup.sh | bash
 ```
 
-### Global NPM Installation (Easiest for Node users)
+### Global NPM Setup (Alternative)
 
-Install the CLI globally directly from NPM:
 ```bash
 npm install -g aiask
 ```
 
-Then reload your terminal or source your config, and run:
-```bash
-aiask "your question here"
-```
-
-### Direct Source Installation (Alternative)
-
-1. **Clone and setup**:
-   ```bash
-   git clone https://github.com/aslepenkov/aiask.git
-   cd aiask
-   ./setup.sh
-   ```
-
-2. **Reload your shell**:
-   ```bash
-   source ~/.bashrc   # or ~/.zshrc for zsh users
-   # Or simply restart your terminal
-   ```
+*Note: Reload your shell (`source ~/.bashrc` or `source ~/.zshrc`) to start using `aiask` command.*
 
 ## Usage
 
-### Basic Usage
 ```bash
-# Docker setup (after installation)
 aiask "your question here"
-
-# Direct usage
-npm run ask "your question here"
-```
-
-### Example Commands
-```bash
-aiask "list top 5 GDP countries as table"
-aiask "explain quantum computing in simple terms" 
-aiask "what is the difference between async and sync?"
+aiask "explain quantum computing in simple terms"
 aiask "write a Python function to sort a list"
-```
-
-## Log Management
-
-All interactions are automatically logged with timestamps. Here's how to view them:
-
-### List Log Files
-```bash
-docker exec -it aiask-container ls -la /app/data/logs/
-```
-
-### View Today's Log
-```bash
-docker exec -it aiask-container cat /app/data/logs/$(date +%Y-%m-%d).log
-```
-
-### View Specific Date Log
-```bash
-docker exec -it aiask-container cat /app/data/logs/2025-07-09.log
-```
-
-### View Last 10 Entries
-```bash
-docker exec -it aiask-container tail -10 /app/data/logs/$(date +%Y-%m-%d).log
-```
-
-### Follow Live Log Updates
-```bash
-docker exec -it aiask-container tail -f /app/data/logs/$(date +%Y-%m-%d).log
-```
-
-### Search in Logs
-```bash
-# Search in today's log
-docker exec -it aiask-container grep -i "python" /app/data/logs/$(date +%Y-%m-%d).log
-
-# Search across all logs
-docker exec -it aiask-container grep -r "programming" /app/data/logs/
-```
-
-### Copy Logs to Host
-```bash
-# Copy today's log
-docker cp aiask-container:/app/data/logs/$(date +%Y-%m-%d).log ./
-
-# Copy all logs
-docker cp aiask-container:/app/data/logs/ ./logs/
-```
-
-### Interactive Log Browsing
-```bash
-docker exec -it aiask-container sh
-cd /app/data/logs
-ls -la
-cat 2025-07-09.log
-exit
-```
-
-## Log Format
-```
-2025-07-09T10:06:44.566Z
-INPUT: what is 2+2?
-OUTPUT: 4
----
-```
-
-## Authentication
-
-On first use, you'll be prompted to authenticate with GitHub:
-
-1. Visit the provided URL
-2. Enter the device code  
-3. Press Enter to continue
-4. Token is saved automatically for future use
-
-## File Structure
-
-```
-aiask/
-├── ask.ts              # Single source file (main application)
-├── package.json        # Dependencies and scripts
-├── tsconfig.json       # TypeScript configuration
-├── Dockerfile          # Docker container setup
-├── setup.sh           # Setup script for Docker
-├── token              # GitHub token (auto-generated)
-├── logs/              # Daily log files
-│   └── 2025-07-09.log # Format: YYYY-MM-DD.log
-└── dist/              # Built JavaScript (auto-generated)
-    └── ask.js
 ```
 
 ## Configuration
 
-### Environment Variables
-
-You can configure `aiask` using the following environment variables:
+`aiask` natively loads configurations from a `.env` file (saved at `~/.aiask-data/.env` or `./.env`).
 
 | Variable | Description | Default / Example |
 |---|---|---|
-| `NIM_TOKEN` | Your NVIDIA NGC API key. Setting this will route all completions through NVIDIA NIM. | `nvapi-...` |
-| `NIM_MODEL` | The AI model to use on NVIDIA NIM. | `meta/llama-3.1-8b-instruct` |
-| `NIM_BASE_URL` | Custom base URL for NVIDIA NIM (for hosted or self-hosted endpoints). | `https://integrate.api.nvidia.com/v1` |
-| `NODE_NO_WARNINGS` | Suppresses Node.js deprecation warnings (Docker only). | `1` |
-
-System prompt: "Answer shortly as an engineer would."
-
-## Logging
-
-All interactions are automatically logged to daily files:
-```
-2025-07-09T09:48:30.932Z
-INPUT: what is 2+2?
-OUTPUT: 4
----
-```
-
-## Docker Details
-
-The Docker setup creates:
-- **Persistent container** - `aiask-container` (faster than creating new containers)
-- **Data volume** - `~/.aiask-data` (stores token and logs)
-- **Auto-restart** - Container starts automatically with Docker
-
-## Commands
-
-```bash
-# Setup (one-time)
-./setup.sh
-
-# Ask questions
-aiask "your question"
-
-# Manual usage
-npm run ask "your question"
-npm run build                    # Build TypeScript
-node dist/ask.js "your question" # Run built version
-
-# Docker management
-docker stop aiask-container                           # Stop container
-docker start aiask-container                          # Start container
-docker exec -it aiask-container node dist/ask.js "q" # Direct container usage
-```
-
-## Cleanup
-
-Remove everything:
-```bash
-docker stop aiask-container
-docker rm aiask-container
-docker rmi aiask
-rm ~/.aiask_alias.sh
-```
-
-## Dependencies
-
-- `@vscode/copilot-api` - GitHub Copilot API client
-- `undici` - Fast HTTP client
-- `typescript` + `ts-node` - TypeScript support
+| `NIM_TOKEN` | NVIDIA NGC API token. Setting this routes completions through NVIDIA NIM. | `nvapi-...` |
+| `NIM_MODEL` | AI model to use on NVIDIA NIM. | `meta/llama-3.1-8b-instruct` |
+| `NIM_BASE_URL` | Custom base URL for NVIDIA NIM. | `https://integrate.api.nvidia.com/v1` |
 
 ## License
 

@@ -15,6 +15,49 @@ fi
 echo "Building aiask Docker image..."
 docker build -t aiask .
 
+# Ensure data directory exists
+mkdir -p ~/.aiask-data
+
+ENV_FILE="$HOME/.aiask-data/.env"
+
+# Prompt for NVIDIA NIM configuration
+if [ -t 0 ]; then
+    echo ""
+    echo "================================================="
+    echo "           NVIDIA NIM Configuration"
+    echo "================================================="
+    echo "aiask supports using NVIDIA NIM endpoints natively."
+    echo "You can set up your API Key (NGC token) now."
+    echo ""
+    read -p "Do you want to configure an NVIDIA NIM endpoint? (y/N): " CONFIGURE_NIM
+    if [[ "$CONFIGURE_NIM" =~ ^[Yy]$ ]]; then
+        read -p "Enter your NVIDIA NIM Token (NGC API Key): " USER_NIM_TOKEN
+        read -p "Enter NVIDIA NIM Model [meta/llama-3.1-8b-instruct]: " USER_NIM_MODEL
+        USER_NIM_MODEL=${USER_NIM_MODEL:-meta/llama-3.1-8b-instruct}
+        read -p "Enter NVIDIA NIM Base URL [https://integrate.api.nvidia.com/v1]: " USER_NIM_BASE_URL
+        USER_NIM_BASE_URL=${USER_NIM_BASE_URL:-https://integrate.api.nvidia.com/v1}
+
+        echo "Writing configuration to $ENV_FILE..."
+        cat << EOF > "$ENV_FILE"
+NIM_TOKEN="$USER_NIM_TOKEN"
+NIM_MODEL="$USER_NIM_MODEL"
+NIM_BASE_URL="$USER_NIM_BASE_URL"
+EOF
+        echo "NVIDIA NIM configured successfully!"
+    else
+        echo "Skipping NVIDIA NIM configuration. You can configure it later in $ENV_FILE"
+        if [ ! -f "$ENV_FILE" ]; then
+            touch "$ENV_FILE"
+        fi
+    fi
+else
+    echo "[INFO] Non-interactive shell detected, skipping NIM configuration prompting."
+    if [ ! -f "$ENV_FILE" ]; then
+        touch "$ENV_FILE"
+    fi
+fi
+echo ""
+
 # Stop and remove existing container if it exists
 docker stop aiask-container 2>/dev/null || true
 docker rm aiask-container 2>/dev/null || true

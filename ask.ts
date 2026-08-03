@@ -4,6 +4,16 @@ import path from 'path';
 import { fetch } from 'undici';
 import { CAPIClient } from '@vscode/copilot-api';
 
+// Load .env file natively if available
+try {
+    if (typeof process.loadEnvFile === 'function') {
+        const envPath = process.env.DATA_DIR ? process.env.DATA_DIR + '/.env' : './.env';
+        process.loadEnvFile(envPath);
+    }
+} catch {
+    // Ignore if file doesn't exist
+}
+
 const CLIENT_ID = '01ab8ac9400c4e429b23';
 const SYSTEM_PROMPT = 'Answer shortly as an engineer would.';
 const TOKEN_FILE = process.env.DATA_DIR ? process.env.DATA_DIR + '/token' : './token';
