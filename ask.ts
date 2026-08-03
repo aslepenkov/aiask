@@ -1,27 +1,48 @@
 #!/usr/bin/env node
 import fs from 'fs/promises';
+import { readFileSync } from 'fs';
 import path from 'path';
+import os from 'os';
 import { fetch } from 'undici';
 import { CAPIClient } from '@vscode/copilot-api';
 
-// Load .env file natively if available
+// Determine configuration directories and files
+const DATA_DIR = process.env.DATA_DIR || path.join(os.homedir(), '.aiask-data');
+const ENV_PATH = path.join(DATA_DIR, '.env');
+const TOKEN_FILE = path.join(DATA_DIR, 'token');
+const LOG_DIR = path.join(DATA_DIR, 'logs');
+
+// Load environment variables synchronously and robustly
 try {
-    if (typeof process.loadEnvFile === 'function') {
-        const envPath = process.env.DATA_DIR ? process.env.DATA_DIR + '/.env' : './.env';
-        process.loadEnvFile(envPath);
+    const content = readFileSync(ENV_PATH, 'utf8');
+    const lines = content.split('\n');
+    for (const line of lines) {
+        // Match key=value, ignoring comments
+        const match = line.match(/^\s*(export\s+)?([^#=\s]+)\s*=\s*(.*)$/);
+        if (match) {
+            const key = match[2].trim();
+            let val = match[3].trim();
+            // Strip inline comments if not part of a quoted string
+            const isQuoted = (val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"));
+            if (!isQuoted) {
+                const commentIdx = val.indexOf('#');
+                if (commentIdx !== -1) {
+                    val = val.substring(0, commentIdx).trim();
+                }
+            }
+            // Strip surrounding single/double quotes
+            if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+                val = val.substring(1, val.length - 1);
+            }
+            process.env[key] = val;
+        }
     }
 } catch {
-    // Ignore if file doesn't exist
+    // Ignore if file doesn't exist or is not readable
 }
 
 const CLIENT_ID = '01ab8ac9400c4e429b23';
 const SYSTEM_PROMPT = 'Answer shortly as an engineer would.';
-const TOKEN_FILE = process.env.DATA_DIR ? process.env.DATA_DIR + '/token' : './token';
-const LOG_DIR = process.env.DATA_DIR ? process.env.DATA_DIR + '/logs' : './logs';
-
-const NIM_TOKEN = process.env.NIM_TOKEN || process.env.nim_token;
-const NIM_MODEL = process.env.NIM_MODEL || process.env.nim_model || 'meta/llama-3.1-8b-instruct';
-const NIM_BASE_URL = process.env.NIM_BASE_URL || process.env.nim_base_url || 'https://integrate.api.nvidia.com/v1';
 
 const CLIENT_CONFIG = {
     machineId: 'cli',
@@ -124,9 +145,8 @@ async function getCopilotToken(githubToken: string): Promise<string> {
 }
 
 export async function getModel(): Promise<string> {
-    const envPath = process.env.DATA_DIR ? process.env.DATA_DIR + '/.env' : './.env';
     try {
-        const content = await fs.readFile(envPath, 'utf8');
+        const content = await fs.readFile(ENV_PATH, 'utf8');
         const match = content.match(/^\s*(export\s+)?NIM_MODEL\s*=\s*(.*)$/m);
         if (match) {
             let val = match[2].trim();
@@ -142,10 +162,9 @@ export async function getModel(): Promise<string> {
 }
 
 export async function setModel(modelName: string): Promise<void> {
-    const envPath = process.env.DATA_DIR ? process.env.DATA_DIR + '/.env' : './.env';
     let content = '';
     try {
-        content = await fs.readFile(envPath, 'utf8');
+        content = await fs.readFile(ENV_PATH, 'utf8');
     } catch {
         // File doesn't exist
     }
@@ -170,8 +189,8 @@ export async function setModel(modelName: string): Promise<void> {
         newLines.push(`NIM_MODEL=${modelName}`);
     }
 
-    await fs.mkdir(path.dirname(envPath), { recursive: true });
-    await fs.writeFile(envPath, newLines.join('\n'), 'utf8');
+    await fs.mkdir(path.dirname(ENV_PATH), { recursive: true });
+    await fs.writeFile(ENV_PATH, newLines.join('\n'), 'utf8');
     process.env.NIM_MODEL = modelName;
 }
 
@@ -179,13 +198,16 @@ export async function ask(prompt: string): Promise<void> {
     try {
         console.log(`[INFO] Asking: "${prompt}"`);
 
-        if (NIM_TOKEN) {
+        const nimToken = process.env.NIM_TOKEN || process.env.nim_token;
+        const nimBaseUrl = process.env.NIM_BASE_URL || process.env.nim_base_url || 'https://integrate.api.nvidia.com/v1';
+
+        if (nimToken) {
             const currentModel = await getModel();
-            const response = await fetch(`${NIM_BASE_URL}/chat/completions`, {
+            const response = await fetch(`${nimBaseUrl}/chat/completions`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${NIM_TOKEN}`
+                    'Authorization': `Bearer ${nimToken}`
                 },
                 body: JSON.stringify({
                     model: currentModel,
@@ -195,6 +217,7 @@ export async function ask(prompt: string): Promise<void> {
                     ],
                     temperature: 0.7,
                     max_tokens: 1000,
+                    stream: false,
                 })
             });
 

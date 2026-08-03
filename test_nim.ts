@@ -58,6 +58,7 @@ await new Promise<void>((resolve) => {
         const port = address.port;
         // Set environment variables before importing ask.ts
         process.env.NODE_ENV = 'test';
+        process.env.DATA_DIR = '.';
         process.env.NIM_TOKEN = 'test-token';
         process.env.NIM_MODEL = 'test-model';
         process.env.NIM_BASE_URL = `http://127.0.0.1:${port}/v1`;
