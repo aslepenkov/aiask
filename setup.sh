@@ -1,5 +1,16 @@
 #!/bin/bash
 
+set -e
+
+# Support curl-to-bash installation
+if [ ! -f "Dockerfile" ]; then
+    echo "[INFO] No Dockerfile found in current directory. Setting up a temporary checkout..."
+    TEMP_DIR=$(mktemp -d)
+    echo "Cloning repository to $TEMP_DIR..."
+    git clone https://github.com/aslepenkov/aiask.git "$TEMP_DIR" --depth=1
+    cd "$TEMP_DIR"
+fi
+
 # Build the Docker image
 echo "Building aiask Docker image..."
 docker build -t aiask .

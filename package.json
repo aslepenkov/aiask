@@ -2,12 +2,19 @@
   "name": "aiask",
   "version": "1.0.0",
   "description": "A minimal CLI for interacting with GitHub Copilot API",
-  "main": "ask.ts",
+  "main": "dist/ask.js",
+  "bin": {
+    "aiask": "./dist/ask.js"
+  },
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "scripts": {
     "build": "tsc",
     "ask": "NODE_NO_WARNINGS=1 node --loader ts-node/esm ask.ts",
-    "start": "node dist/ask.js"
+    "start": "node dist/ask.js",
+    "test": "npm run build && NODE_NO_WARNINGS=1 NODE_ENV=test node dist/test_nim.js"
   },
   "keywords": [
     "copilot",
