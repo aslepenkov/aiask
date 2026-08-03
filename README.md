@@ -15,14 +15,33 @@ A super minimalistic CLI tool for asking questions to GitHub Copilot. Single fil
 ## Installation
 
 ### Prerequisites
-- Docker (for containerized setup)
-- Node.js 20+ (for direct usage)
+- Docker (for containerized/daemonized setup)
+- Node.js 20+ (for direct/npm global usage)
 
-### Docker Setup (Recommended)
+### One-liner Docker Setup (Recommended)
+
+Install dynamically without cloning manually:
+```bash
+curl -fsSL https://raw.githubusercontent.com/aslepenkov/aiask/main/setup.sh | bash
+```
+
+### Global NPM Installation (Easiest for Node users)
+
+Install the CLI globally directly from NPM:
+```bash
+npm install -g aiask
+```
+
+Then reload your terminal or source your config, and run:
+```bash
+aiask "your question here"
+```
+
+### Direct Source Installation (Alternative)
 
 1. **Clone and setup**:
    ```bash
-   git clone <your-repo>
+   git clone https://github.com/aslepenkov/aiask.git
    cd aiask
    ./setup.sh
    ```
@@ -32,14 +51,6 @@ A super minimalistic CLI tool for asking questions to GitHub Copilot. Single fil
    source ~/.bashrc   # or ~/.zshrc for zsh users
    # Or simply restart your terminal
    ```
-
-### Direct Usage (Alternative)
-
-```bash
-git clone <your-repo>
-cd aiask
-npm install
-```
 
 ## Usage
 
@@ -151,8 +162,16 @@ aiask/
 
 ## Configuration
 
-The app uses these environment variables (Docker only):
-- `NODE_NO_WARNINGS` - Suppresses Node.js deprecation warnings
+### Environment Variables
+
+You can configure `aiask` using the following environment variables:
+
+| Variable | Description | Default / Example |
+|---|---|---|
+| `NIM_TOKEN` | Your NVIDIA NGC API key. Setting this will route all completions through NVIDIA NIM. | `nvapi-...` |
+| `NIM_MODEL` | The AI model to use on NVIDIA NIM. | `meta/llama-3.1-8b-instruct` |
+| `NIM_BASE_URL` | Custom base URL for NVIDIA NIM (for hosted or self-hosted endpoints). | `https://integrate.api.nvidia.com/v1` |
+| `NODE_NO_WARNINGS` | Suppresses Node.js deprecation warnings (Docker only). | `1` |
 
 System prompt: "Answer shortly as an engineer would."
 
