@@ -21,9 +21,10 @@
     "esm": true,
     "experimentalSpecifierResolution": "node"
   },
-  // Include single file
+  // Include files
   "include": [
-    "ask.ts"
+    "ask.ts",
+    "test_nim.ts"
   ],
   // Exclude build output and dependencies
   "exclude": [

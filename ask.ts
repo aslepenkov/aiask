@@ -8,6 +8,10 @@ const SYSTEM_PROMPT = 'Answer shortly as an engineer would.';
 const TOKEN_FILE = process.env.DATA_DIR ? process.env.DATA_DIR + '/token' : './token';
 const LOG_DIR = process.env.DATA_DIR ? process.env.DATA_DIR + '/logs' : './logs';
 
+const NIM_TOKEN = process.env.NIM_TOKEN || process.env.nim_token;
+const NIM_MODEL = process.env.NIM_MODEL || process.env.nim_model || 'meta/llama-3.1-8b-instruct';
+const NIM_BASE_URL = process.env.NIM_BASE_URL || process.env.nim_base_url || 'https://integrate.api.nvidia.com/v1';
+
 const CLIENT_CONFIG = {
     machineId: 'cli',
     sessionId: 'cli-session',
@@ -108,9 +112,42 @@ async function getCopilotToken(githubToken: string): Promise<string> {
     return data.token;
 }
 
-async function ask(prompt: string): Promise<void> {
+export async function ask(prompt: string): Promise<void> {
     try {
         console.log(`[INFO] Asking: "${prompt}"`);
+
+        if (NIM_TOKEN) {
+            const response = await fetch(`${NIM_BASE_URL}/chat/completions`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${NIM_TOKEN}`
+                },
+                body: JSON.stringify({
+                    model: NIM_MODEL,
+                    messages: [
+                        { role: 'system', content: SYSTEM_PROMPT },
+                        { role: 'user', content: prompt }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 1000,
+                })
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(`NVIDIA NIM API error (${response.status}): ${text}`);
+            }
+
+            const data = await response.json() as any;
+            const answer = data.choices?.[0]?.message?.content || 'No response';
+
+            console.log('\nResponse:');
+            console.log(answer);
+
+            await log(prompt, answer);
+            return;
+        }
 
         const githubToken = await getToken();
         const copilotToken = await getCopilotToken(githubToken);
@@ -157,17 +194,21 @@ async function ask(prompt: string): Promise<void> {
     } catch (error: any) {
         console.error('[ERROR]', error.message || error);
     } finally {
-        process.exit(0);
+        if (process.env.NODE_ENV !== 'test') {
+            process.exit(0);
+        }
     }
 }
 
 // Main
-const args = process.argv.slice(2);
-const prompt = args.join(' ');
+if (process.env.NODE_ENV !== 'test') {
+    const args = process.argv.slice(2);
+    const prompt = args.join(' ');
 
-if (!prompt) {
-    console.log('Usage: aiask "your question"');
-    process.exit(0);
+    if (!prompt) {
+        console.log('Usage: aiask "your question"');
+        process.exit(0);
+    }
+
+    ask(prompt);
 }
-
-ask(prompt);

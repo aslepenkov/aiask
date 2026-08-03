@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc",
     "ask": "NODE_NO_WARNINGS=1 node --loader ts-node/esm ask.ts",
-    "start": "node dist/ask.js"
+    "start": "node dist/ask.js",
+    "test": "npm run build && NODE_NO_WARNINGS=1 NODE_ENV=test node dist/test_nim.js"
   },
   "keywords": [
     "copilot",
