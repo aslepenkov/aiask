@@ -123,11 +123,64 @@ async function getCopilotToken(githubToken: string): Promise<string> {
     return data.token;
 }
 
+export async function getModel(): Promise<string> {
+    const envPath = process.env.DATA_DIR ? process.env.DATA_DIR + '/.env' : './.env';
+    try {
+        const content = await fs.readFile(envPath, 'utf8');
+        const match = content.match(/^\s*(export\s+)?NIM_MODEL\s*=\s*(.*)$/m);
+        if (match) {
+            let val = match[2].trim();
+            if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+                val = val.substring(1, val.length - 1);
+            }
+            return val;
+        }
+    } catch {
+        // Ignore and fall through
+    }
+    return process.env.NIM_MODEL || process.env.nim_model || 'meta/llama-3.1-8b-instruct';
+}
+
+export async function setModel(modelName: string): Promise<void> {
+    const envPath = process.env.DATA_DIR ? process.env.DATA_DIR + '/.env' : './.env';
+    let content = '';
+    try {
+        content = await fs.readFile(envPath, 'utf8');
+    } catch {
+        // File doesn't exist
+    }
+
+    const lines = content.split('\n');
+    let updated = false;
+
+    const newLines = lines.map(line => {
+        const match = line.match(/^\s*(export\s+)?NIM_MODEL\s*=\s*(.*)$/);
+        if (match) {
+            updated = true;
+            const prefix = match[1] || '';
+            return `${prefix}NIM_MODEL=${modelName}`;
+        }
+        return line;
+    });
+
+    if (!updated) {
+        if (content && !content.endsWith('\n')) {
+            newLines.push('');
+        }
+        newLines.push(`NIM_MODEL=${modelName}`);
+    }
+
+    await fs.mkdir(path.dirname(envPath), { recursive: true });
+    await fs.writeFile(envPath, newLines.join('\n'), 'utf8');
+    process.env.NIM_MODEL = modelName;
+}
+
 export async function ask(prompt: string): Promise<void> {
     try {
         console.log(`[INFO] Asking: "${prompt}"`);
 
         if (NIM_TOKEN) {
+            const currentModel = await getModel();
             const response = await fetch(`${NIM_BASE_URL}/chat/completions`, {
                 method: 'POST',
                 headers: {
@@ -135,7 +188,7 @@ export async function ask(prompt: string): Promise<void> {
                     'Authorization': `Bearer ${NIM_TOKEN}`
                 },
                 body: JSON.stringify({
-                    model: NIM_MODEL,
+                    model: currentModel,
                     messages: [
                         { role: 'system', content: SYSTEM_PROMPT },
                         { role: 'user', content: prompt }
@@ -211,15 +264,40 @@ export async function ask(prompt: string): Promise<void> {
     }
 }
 
+export async function handleCli(args: string[]): Promise<void> {
+    if (args.length > 0 && args[0] === 'model') {
+        if (args.length === 1) {
+            const model = await getModel();
+            console.log(model);
+            if (process.env.NODE_ENV !== 'test') {
+                process.exit(0);
+            }
+            return;
+        } else if (args.length === 2) {
+            const newModel = args[1];
+            await setModel(newModel);
+            console.log(`Model successfully set to: ${newModel}`);
+            if (process.env.NODE_ENV !== 'test') {
+                process.exit(0);
+            }
+            return;
+        }
+    }
+
+    const prompt = args.join(' ');
+    if (!prompt) {
+        console.log('Usage: aiask "your question"');
+        if (process.env.NODE_ENV !== 'test') {
+            process.exit(0);
+        }
+        return;
+    }
+
+    await ask(prompt);
+}
+
 // Main
 if (process.env.NODE_ENV !== 'test') {
     const args = process.argv.slice(2);
-    const prompt = args.join(' ');
-
-    if (!prompt) {
-        console.log('Usage: aiask "your question"');
-        process.exit(0);
-    }
-
-    ask(prompt);
+    handleCli(args);
 }

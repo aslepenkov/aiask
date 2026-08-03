@@ -65,13 +65,13 @@ await new Promise<void>((resolve) => {
     });
 });
 
-// Import the ask function dynamically after env vars are set
-const { ask } = await import('./ask.js');
+// Import the ask function and CLI handler dynamically after env vars are set
+const { handleCli, getModel, setModel } = await import('./ask.js');
 
 console.log('--- Starting NVIDIA NIM Integration Test ---');
 
 // Capture console output
-const capturedLogs: string[] = [];
+let capturedLogs: string[] = [];
 const originalLog = console.log;
 console.log = (...args: any[]) => {
     capturedLogs.push(args.join(' '));
@@ -79,8 +79,37 @@ console.log = (...args: any[]) => {
 };
 
 try {
+    // 1. Test model viewing when model is not set explicitly in .env
+    capturedLogs = [];
+    await handleCli(['model']);
+    if (capturedLogs.length === 0 || !capturedLogs[0].includes('test-model')) {
+        throw new Error(`Expected model output to default to "test-model" (from env), got: ${capturedLogs.join('\n')}`);
+    }
+
+    // 2. Test model changing
+    capturedLogs = [];
+    await handleCli(['model', 'new-super-model']);
+    if (!capturedLogs.join('\n').includes('Model successfully set to: new-super-model')) {
+        throw new Error(`Expected success message when changing model, got: ${capturedLogs.join('\n')}`);
+    }
+
+    // Check that getModel returns the new model name
+    const currentModel = await getModel();
+    if (currentModel !== 'new-super-model') {
+        throw new Error(`Expected model to be "new-super-model", but got "${currentModel}"`);
+    }
+
+    // Verify the .env file has been updated
+    const envPath = './.env';
+    const envContent = await fs.readFile(envPath, 'utf8');
+    if (!envContent.includes('NIM_MODEL=new-super-model')) {
+        throw new Error(`Expected .env file to contain NIM_MODEL=new-super-model, got:\n${envContent}`);
+    }
+
+    // 3. Test asking a question which now uses the newly configured model
+    capturedLogs = [];
     const testPrompt = 'Hello NVIDIA NIM!';
-    await ask(testPrompt);
+    await handleCli([testPrompt]);
 
     // Restore original console.log
     console.log = originalLog;
@@ -94,8 +123,9 @@ try {
         throw new Error(`Expected Authorization header "Bearer test-token", got: ${lastRequestHeaders['authorization']}`);
     }
 
-    if (lastRequestBody.model !== 'test-model') {
-        throw new Error(`Expected model to be "test-model", got: ${lastRequestBody.model}`);
+    // It should be the custom model we just configured!
+    if (lastRequestBody.model !== 'new-super-model') {
+        throw new Error(`Expected model to be "new-super-model", got: ${lastRequestBody.model}`);
     }
 
     if (lastRequestBody.messages[1].content !== testPrompt) {
@@ -118,8 +148,9 @@ try {
         throw new Error(`Expected log file content to contain prompt and response, but got:\n${fileContent}`);
     }
 
-    // Clean up log file created during test
+    // Clean up files created during test
     await fs.unlink(logFile);
+    await fs.unlink(envPath);
     console.log('[SUCCESS] NVIDIA NIM Integration Test Passed!');
     server.close();
     process.exit(0);
