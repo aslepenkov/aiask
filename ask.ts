@@ -41,12 +41,19 @@ export async function handleCli(args: string[]): Promise<void> {
     return;
   }
 
+  if (args[0] === 'fund') {
+    const wallet = process.env.SOLANA_WALLET || process.env.AIASK_SOLANA_WALLET || 'Set SOLANA_WALLET in ~/.aiask/.env';
+    console.log(`\n💖 Support AiAsk Development\n\nRun 'npm fund' or send tips on Solana (USDT/SOL):\n${wallet}\n`);
+    return;
+  }
+
   if (!args.length) {
     console.log(`
 Usage:
   aiask "your question"
   aiask model
   aiask model <model-name>
+  aiask fund
 `);
     return;
   }

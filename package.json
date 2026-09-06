@@ -10,6 +10,12 @@
     "dist"
   ],
   "type": "module",
+  "funding": [
+    {
+      "type": "solana",
+      "url": "solana:USDT"
+    }
+  ],
   "scripts": {
     "build": "tsc",
     "ask": "NODE_NO_WARNINGS=1 node --loader ts-node/esm ask.ts",

@@ -138,7 +138,14 @@ try {
         throw new Error(`Expected .env to contain NIM_MODEL=new-super-model, got:\n${envContent}`);
     }
 
-    // 5. Test asking a question with configured system prompt & model
+    // 5. Test fund command
+    capturedLogs = [];
+    await handleCli(['fund']);
+    if (!capturedLogs.join('\n').includes('Support AiAsk Development')) {
+        throw new Error(`Expected funding output, got: ${capturedLogs.join('\n')}`);
+    }
+
+    // 6. Test asking a question with configured system prompt & model
     capturedLogs = [];
     const testPrompt = 'Hello NVIDIA NIM!';
     await handleCli([testPrompt]);
