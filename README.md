@@ -128,6 +128,13 @@ AiAsk stores its persistent data in:
 
 The GitHub authentication token is stored locally and reused on subsequent requests.
 
+## Funding & Support
+
+If you find AiAsk helpful and want to support its ongoing development:
+
+* Run `npm fund` to view funding details.
+* Run `aiask fund` to display tipping options (including Solana / USDT).
+
 ## Architecture
 
 ```text
