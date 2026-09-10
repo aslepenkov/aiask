@@ -10,6 +10,12 @@
     "dist"
   ],
   "type": "module",
+  "funding": [
+    {
+      "type": "solana",
+      "url": "solana:USDT"
+    }
+  ],
   "scripts": {
     "build": "tsc",
     "ask": "NODE_NO_WARNINGS=1 node --loader ts-node/esm ask.ts",
@@ -26,8 +32,7 @@
   "author": "aslepenkov",
   "license": "MIT",
   "dependencies": {
-    "@vscode/copilot-api": "^0.1.1",
-    "undici": "^7.10.0"
+    "@vscode/copilot-api": "^0.1.1"
   },
   "devDependencies": {
     "@types/node": "^24.0.10",
