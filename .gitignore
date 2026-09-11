@@ -21,7 +21,5 @@ npm-debug.log*
 *.sln
 *.sw?
 
-
 obj/
 bin/
-package-lock.json
