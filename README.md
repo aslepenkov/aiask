@@ -1,163 +1,114 @@
-# AiAsk — Minimal AI ask CLI
+# Vue 3 + TypeScript + Vite + Firebase + Netlify Starter Template
 
-A minimal CLI tool for asking questions using **GitHub Copilot** or **NVIDIA NIM**.
+A production-ready scaffold template for building modern web applications with **Vue 3**, **TypeScript**, **Vite**, **Firebase (Firestore)**, and continuous deployment worldwide via **Netlify** and **GitHub Actions**.
 
-No Docker. No daemon. Install globally with npm and use `aiask` from anywhere.
+## 🚀 Features
 
-![AiAsk Dem](https://github.com/user-attachments/assets/54cbcbf3-3d6f-430e-af70-0ccd10f3955d)
+- ⚡ **Vite 6** — Lightning-fast HMR and optimized build setup.
+- 💚 **Vue 3 Composition API** — Reactive, modular UI development with `<script setup>`.
+- 📘 **TypeScript** — Type safety and clean project architecture.
+- 🔥 **Firebase Firestore** — Real-time Cloud Firestore integration sample (CRUD operations).
+- 🌐 **Netlify Ready** — Pre-configured SPA redirects (`netlify.toml`).
+- 🤖 **GitHub Actions CI/CD** — Automatic build and worldwide deployment to Netlify on git push.
 
-## Features
+---
 
-* 🤖 **GitHub Copilot or NVIDIA NIM** — use Copilot by default or route requests through NVIDIA NIM
-* 🔐 **One-time GitHub authentication** — OAuth device flow with persistent token storage
-* 📝 **Daily logging** — automatically stores questions and answers
-* ⚙️ **Model configuration** — easily view or change the active NIM model
-* 📦 **Global npm CLI** — available as `aiask` from any directory
-* ⚡ **Minimalistic** — small TypeScript-based CLI with no Docker runtime
+## 🛠️ Project Setup
 
-## Installation
-
-### One-liner
+### 1. Install Dependencies
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/aslepenkov/aiask/main/setup.sh | bash
-```
-
-The installer:
-
-1. Clones the repository if necessary
-2. Installs npm dependencies
-3. Builds the TypeScript project
-4. Installs `aiask` globally
-5. Optionally configures NVIDIA NIM
-
-### From npm
-
-```bash
-npm install -g aiask
-```
-
-### From source
-
-```bash
-git clone https://github.com/aslepenkov/aiask.git
-cd aiask
-
 npm install
-npm run build
-npm install -g .
 ```
 
-## Usage
+### 2. Configure Environment Variables
 
-Ask a question:
+Copy `.env.example` to `.env.local` and fill in your Firebase project credentials:
 
 ```bash
-aiask "your question here"
+cp .env.example .env.local
 ```
 
-Examples:
-
-```bash
-aiask "explain quantum computing in simple terms"
-
-aiask "write a Python function to sort a list"
-
-aiask "explain async await in C#"
-```
-
-## Model
-
-Show the current NVIDIA NIM model:
-
-```bash
-aiask model
-```
-
-Change the model:
-
-```bash
-aiask model meta/llama-3.1-70b-instruct
-```
-
-The model configuration is stored persistently in:
-
-```text
-~/.aiask/.env
-```
-
-## Configuration
-
-AiAsk automatically loads configuration from:
-
-```text
-~/.aiask/.env
-```
-
-### NVIDIA NIM
-
-If `NIM_TOKEN` is configured, requests are sent through NVIDIA NIM.
-
-| Variable       | Description             | Default                               |
-| -------------- | ----------------------- | ------------------------------------- |
-| `NIM_TOKEN`    | NVIDIA NGC API token    | —                                     |
-| `NIM_MODEL`    | NVIDIA NIM model        | `meta/llama-3.1-8b-instruct`          |
-| `NIM_BASE_URL` | NVIDIA NIM API base URL | `https://integrate.api.nvidia.com/v1` |
-
-Example:
+Fill in your `.env.local`:
 
 ```env
-NIM_TOKEN="nvapi-..."
-NIM_MODEL="meta/llama-3.1-8b-instruct"
-NIM_BASE_URL="https://integrate.api.nvidia.com/v1"
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
 ```
 
-If `NIM_TOKEN` is not configured, AiAsk uses GitHub Copilot authentication.
+### 3. Local Development
 
-## Data
+Start the local Vite development server:
 
-AiAsk stores its persistent data in:
+```bash
+npm run dev
+```
+
+### 4. Build for Production
+
+Type-check and bundle for production:
+
+```bash
+npm run build
+```
+
+Preview the production build locally:
+
+```bash
+npm run preview
+```
+
+---
+
+## 📦 Deploying to Netlify via GitHub Actions CI/CD
+
+This repository includes a pre-configured GitHub Actions workflow (`.github/workflows/deploy.yml`) that automatically builds and deploys your site worldwide on every push or pull request to `main` or `dev`.
+
+### GitHub Repository Secrets Setup
+
+To enable automated deployment, add the following Secrets under your GitHub Repository Settings (`Settings -> Secrets and variables -> Actions`):
+
+#### Netlify Credentials:
+- `NETLIFY_AUTH_TOKEN`: Personal Access Token generated in Netlify (`User Settings -> Personal Access Tokens`).
+- `NETLIFY_SITE_ID`: API ID found in Netlify site settings (`Site configuration -> General -> Site details -> API ID`).
+
+#### Firebase Config (Optional for Production Build):
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+
+---
+
+## 📂 Project Architecture
 
 ```text
-~/.aiask/
-├── .env
-├── token
-└── logs/
-    └── YYYY-MM-DD.log
+├── .github/
+│   └── workflows/
+│       └── deploy.yml      # CI/CD workflow for Netlify build & deploy
+├── src/
+│   ├── components/
+│   │   └── FirestoreDemo.vue # Demo component showcasing Firestore CRUD
+│   ├── App.vue             # Root App component
+│   ├── firebase.ts         # Firebase App & Firestore initialization
+│   ├── main.ts             # App entry point
+│   ├── style.css           # Global styles
+│   └── vite-env.d.ts       # Vite & Vue type definitions
+├── index.html              # HTML entry template
+├── netlify.toml            # Netlify build settings & SPA rewrite rules
+├── package.json            # Project dependencies & scripts
+├── tsconfig.json           # TypeScript configuration
+└── vite.config.ts          # Vite configuration
 ```
 
-The GitHub authentication token is stored locally and reused on subsequent requests.
+---
 
-## Funding & Support
-
-If you find AiAsk helpful and want to support its ongoing development:
-
-* Run `npm fund` to view funding details.
-* Run `aiask fund` to display tipping options (including Solana / USDT).
-
-## Architecture
-
-```text
-aiask "question"
-       │
-       ├── NIM_TOKEN configured
-       │        ↓
-       │   NVIDIA NIM API
-       │
-       └── NIM_TOKEN not configured
-                ↓
-          GitHub OAuth
-                ↓
-          GitHub Copilot
-```
-
-## Requirements
-
-* Node.js >= 20
-* npm
-
-Docker is **not required**.
-
-## License
+## 📜 License
 
 MIT

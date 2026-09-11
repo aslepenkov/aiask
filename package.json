@@ -1,42 +1,21 @@
 {
-  "name": "aiask",
-  "version": "1.0.0",
-  "description": "A minimal CLI for interacting with GitHub Copilot API",
-  "main": "dist/ask.js",
-  "bin": {
-    "aiask": "./dist/ask.js"
-  },
-  "files": [
-    "dist"
-  ],
+  "name": "vue-vite-firebase-netlify-template",
+  "private": true,
+  "version": "0.1.0",
   "type": "module",
-  "funding": [
-    {
-      "type": "solana",
-      "url": "solana:USDT"
-    }
-  ],
   "scripts": {
-    "build": "tsc",
-    "ask": "NODE_NO_WARNINGS=1 node --loader ts-node/esm ask.ts",
-    "start": "node dist/ask.js",
-    "test": "npm run build && NODE_NO_WARNINGS=1 NODE_ENV=test node dist/test_nim.js"
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
   },
-  "keywords": [
-    "copilot",
-    "github",
-    "cli",
-    "ai",
-    "assistant"
-  ],
-  "author": "aslepenkov",
-  "license": "MIT",
   "dependencies": {
-    "@vscode/copilot-api": "^0.1.1"
+    "firebase": "^11.4.0",
+    "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@types/node": "^24.0.10",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0",
+    "vue-tsc": "^2.2.8"
   }
 }
